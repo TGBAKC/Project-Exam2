@@ -1,146 +1,143 @@
 import React, { useState, useEffect } from "react";
+import SearchBar from "./SearchBar";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faWifi,
-  faCar,
-  faCoffee,
-  faDog,
-} from "@fortawesome/free-solid-svg-icons";
+import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+import { faStar, faStarHalfAlt } from "@fortawesome/free-solid-svg-icons";
 
-function VenueList() {
-  const [venues, setVenues] = useState([]);
-  const [query, setQuery] = useState(""); // Search query
-  const [loading, setLoading] = useState(false);
+const Rating = ({ rating }) => {
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    if (i <= rating) {
+      stars.push(<FontAwesomeIcon key={i} icon={faStar} style={{ color: "#FFD700" }} />);
+    } else if (i - 0.5 === rating) {
+      stars.push(<FontAwesomeIcon key={i} icon={faStarHalfAlt} style={{ color: "#FFD700" }} />);
+    } else {
+      stars.push(<FontAwesomeIcon key={i} icon={faStar} style={{ color: "#ccc" }} />);
+    }
+  }
+  return <span>{stars}</span>;
+};
+const VenueList = () => {
+  const [venues, setVenues] = useState([]); // Mekanlar
+  const [loading, setLoading] = useState(false); // Yükleniyor durumu
+  const [error, setError] = useState(null); // Hata durumu
 
   const fetchVenues = async (searchQuery = "") => {
     setLoading(true);
+    setError(null);
     try {
-      const url = searchQuery
-        ? `https://v2.api.noroff.dev/holidaze/venues/search?q=${searchQuery}&_media=true&_meta=true`
-        : `https://v2.api.noroff.dev/holidaze/venues?_media=true&_meta=true`;
+      let url = `https://v2.api.noroff.dev/holidaze/venues?_media=true&_meta=true`;
+      if (searchQuery) {
+        url += `&q=${encodeURIComponent(searchQuery)}`;
+      }
+
       const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("API request failed");
+      }
+
       const data = await response.json();
-      setVenues(data.data); // Save venue data to state
-    } catch (error) {
-      console.error("Error fetching venues:", error);
+      console.log("API Response:", data); // Gelen veriyi kontrol et
+
+      // Arama sorgusuna uygun sonuçları filtrele
+      if (!searchQuery) {
+        setVenues(data.data); // Tüm mekanları göster
+      } else {
+        const filteredData = data.data.filter((venue) =>
+          venue.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setVenues(filteredData); // Filtrelenmiş sonuçları state'e aktar
+      }
+    } catch (err) {
+      setError("Failed to fetch venues. Please try again later.");
+      console.error("Error fetching venues:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    fetchVenues();
+    fetchVenues(); // İlk yüklendiğinde tüm mekanları getir
   }, []);
-
   return (
-    <div
-      style={{
-        marginTop: "10rem",
-        marginBottom:"10rem",
-        display: "flex",
-        flexDirection: "row", // Arrange venues in a row
-        flexWrap: "wrap", // Wrap to new line when necessary
-        gap: "20px", // Add spacing between venues
-        width: "100%",
-        justifyContent: "center", // Center content
-      }}
-    >
-      {venues.map((venue) => (
-        <Link
-          to={`/details/${venue.id}`} // Navigate to VenueDetails
-          key={venue.id}
-          style={{
-            textDecoration: "none", // Remove underline
-            color: "inherit", // Inherit text color
-          }}
-        >
-          <div
-            style={{
-              border: "1px solid gray",
-              padding: "20px",
-              width: "20rem",
-              height: "35rem", // Venue card size
-              borderRadius: "5px",
-              transition: "transform 0.3s",
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-              cursor: "pointer",
-            }}
-          >
-            <h2 style={{ fontSize: "20px", fontWeight: "bold" }}>{venue.name}</h2>
-
-            {/* Venue Image */}
-            {venue.media && venue.media.length > 0 ? (
-              <img
-                src={venue.media[0].url}
-                alt={venue.media[0].alt || "Venue Image"}
-                style={{
-                  width: "100%",
-                  maxHeight: "200px",
-                  objectFit: "cover",
-                  marginBottom: "10px",
-                  borderRadius: "5px",
-                }}
-              />
-            ) : (
-              <p>No Image Available</p>
-            )}
-
-            <p style={{ fontSize: "10px", color: "#555" }}>{venue.description}</p>
-            <p style={{ fontWeight: "bold" }}>Price: ${venue.price} per night</p>
-            <p style={{ fontSize: "10px" }}>Max Guests: {venue.maxGuests}</p>
-            <p style={{ fontSize: "10px" }}>Rating: {venue.rating}</p>
-
-            {/* Meta Information */}
-            <ul
+    <div style={{ display: "flex", flexDirection: "column", padding: "20px" }}>
+      <h1>Venues</h1>
+      <SearchBar onSearch={fetchVenues} />
+      {loading && <p>Loading venues...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "20px",
+          justifyContent: "center",
+          marginTop: "20px",
+        }}
+      >
+        {venues.length > 0 ? (
+          venues.map((venue) => (
+            <Link
+              to={`/details/${venue.id}`} // Detay sayfasına yönlendirme
+              key={venue.id}
               style={{
-                display: "flex",
-                justifyContent: "center",
-                paddingLeft: "20px",
-                gap: "10px",
+                textDecoration: "none", // Link dekorasyonunu kaldır
+                color: "inherit", // Yazı rengini koru
               }}
             >
-              {venue.meta?.wifi && (
-                <li style={{ listStyle: "none", display: "flex", fontSize: "10px", alignItems: "center" }}>
-                  <FontAwesomeIcon
-                    icon={faWifi}
-                    style={{ marginRight: "5px", fontSize: "10px", color: "green" }}
+            <div
+ style={{
+  flex: "1 1 calc(25% - 20px)", // Kartlar 4 sütun düzenine uyum sağlar (büyük ekranlarda)
+  maxWidth: "calc(25% - 20px)", // Maksimum genişlik 4 sütun düzeni
+  minWidth: "300px", // Kartlar için minimum genişlik
+  marginBottom: "15px",
+  padding: "10px",
+  border: "1px solid #ccc",
+  borderRadius: "8px",
+  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  textAlign: "center",
+  cursor: "pointer",
+}}
+>
+                {venue.media?.length > 0 && (
+                  <img
+                    src={venue.media[0].url}
+                    alt={venue.name}
+                    style={{
+                      width: "100%",
+                      height: "150px",
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                    }}
                   />
-                  <span>WiFi</span>
-                </li>
-              )}
-              {venue.meta?.parking && (
-                <li style={{ listStyle: "none", display: "flex", fontSize: "10px", alignItems: "center" }}>
-                  <FontAwesomeIcon
-                    icon={faCar}
-                    style={{ marginRight: "5px", fontSize: "10px", color: "blue" }}
-                  />
-                  <span>Parking</span>
-                </li>
-              )}
-              {venue.meta?.breakfast && (
-                <li style={{ listStyle: "none", display: "flex", fontSize: "10px", alignItems: "center" }}>
-                  <FontAwesomeIcon
-                    icon={faCoffee}
-                    style={{ marginRight: "5px", fontSize: "10px", color: "orange" }}
-                  />
-                  <span>Breakfast</span>
-                </li>
-              )}
-              {venue.meta?.pets && (
-                <li style={{ listStyle: "none", display: "flex", fontSize: "10px", alignItems: "center" }}>
-                  <FontAwesomeIcon
-                    icon={faDog}
-                    style={{ marginRight: "5px", fontSize: "10px", color: "brown" }}
-                  />
-                  <span>Pets</span>
-                </li>
-              )}
-            </ul>
-          </div>
-        </Link>
-      ))}
+                )}
+                <p>
+                  <strong>{venue.name}</strong>
+                </p>
+                <p>
+                  <strong>Rating:</strong> <Rating rating={venue.rating || 0} />
+                </p>
+                <p>
+  <FontAwesomeIcon
+    icon={faMapMarkerAlt}
+    style={{ color: "#EA6659", marginRight: "5px" }}
+  />
+  {venue.location?.address || "Address not available"}
+</p>
+
+                <p>Price: ${venue.price}</p>
+                <p>Max Guests: {venue.maxGuests}</p>
+                <p>Rating:{venue.rating}</p>
+                <p style={{color:"#EA6659",}}>CHECHK AVAILABITY</p>
+              </div>
+            </Link>
+          ))
+        ) : (
+          !loading && <p>No venues found.</p>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default VenueList;

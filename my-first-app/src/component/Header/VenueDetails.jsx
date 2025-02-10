@@ -1,45 +1,49 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faWifi, faParking, faCoffee, faPaw, faStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 function VenueDetails() {
-  const { id } = useParams();
+  const { id } = useParams(); // Venue ID
+  const navigate = useNavigate();
   const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const [startDate, setStartDate] = useState(null); // Başlangıç tarihi
-  const [endDate, setEndDate] = useState(null); // Bitiş tarihi
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [numberOfGuests, setNumberOfGuests] = useState(1);
 
-  // API'den venue bilgilerini çek
   useEffect(() => {
     const fetchVenueDetails = async () => {
       try {
         const response = await fetch(
           `https://v2.api.noroff.dev/holidaze/venues/${id}?_media=true&_meta=true`
         );
+        const responseData = await response.json();
+        
+        console.log("📌 API'den gelen venue verisi:", responseData);
+        
         if (!response.ok) {
           throw new Error("Failed to fetch venue details.");
         }
-        const data = await response.json();
-        setVenue(data.data);
+
+        setVenue(responseData.data); // API'den dönen veriyi doğru şekilde alıyoruz
       } catch (error) {
-        console.error("Error fetching venue details:", error);
+        console.error("❌ Venue detayları alınamadı:", error);
         setError(true);
       }
       setLoading(false);
     };
-
+  
     fetchVenueDetails();
   }, [id]);
 
   if (loading) return <p>Loading venue details...</p>;
   if (error || !venue) return <p>Failed to load venue details.</p>;
 
-  // Venue bilgilerini çöz
   const {
     name = "Venue Name Not Available",
     description = "Description not available.",
@@ -47,93 +51,82 @@ function VenueDetails() {
     maxGuests = "Not Specified",
     rating = "No Rating",
     media = [],
-    meta = {},
-    location = {},
   } = venue;
+
+  const calculateTotalPrice = () => {
+    if (!startDate || !endDate || price === "Not Available") return "N/A";
+    const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+    return `$${days * price}`;
+  };
+
+  const handleConfirm = () => {
+    if (!startDate || !endDate) {
+      alert("Please select both start and end dates!");
+      return;
+    }
+
+    navigate("/confirm", {
+      state: {
+        venueName: name,
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
+        guests: numberOfGuests,
+      },
+    });
+  };
 
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
+        alignItems: "center",
+        gap: "20px",
         padding: "20px",
-        marginTop: "10rem",
-        maxWidth: "600px",
-        margin: "20px auto",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        maxWidth: "800px",
+        margin: "auto",
+        border: "1px solid #ddd",
+        borderRadius: "10px",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        backgroundColor: "#fff",
+        marginTop:"10rem",
+        marginBottom:"10rem",
       }}
     >
-      {/* Medya Bölümü */}
+      <h1 style={{ fontSize: "24px", fontWeight: "bold" }}>{name}</h1>
       {media.length > 0 ? (
         <img
           src={media[0].url}
-          alt={media[0].alt || "Venue Image"}
+          alt="Venue"
           style={{
             width: "100%",
+            maxHeight: "300px",
+            objectFit: "cover",
             borderRadius: "10px",
-            marginBottom: "10px",
           }}
         />
       ) : (
         <p>No Image Available</p>
       )}
-
-      {/* Başlık Bölümü */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>{name}</h1>
-        <p>
-          <strong>Rating:</strong>
-          <FontAwesomeIcon icon={faStar} style={{ color: "gold", marginLeft: "5px" }} />
-          {rating}
-        </p>
-      </div>
-
-      {/* Adres Bilgisi */}
-      <ul>
-        <li style={{ fontSize: "12px", listStyle: "none" }}>
-          <strong>Address:</strong> {location.address || "Not Provided"}
-        </li>
-      </ul>
-
-      {/* Detaylar */}
-      <div>
-        <p style={{ fontSize: "12px" }}>
-          <strong>Description:</strong> {description}
-        </p>
-        <p style={{ display: "flex", justifyContent: "right" }}>
-          <strong>Price:</strong> {price !== "Not Available" ? `$${price}` : price}
-        </p>
-        <p>
-          <strong>Max Guests:</strong> {maxGuests}
-        </p>
-      </div>
-
-      {/* Meta Bilgileri */}
-      <ul style={{ display: "flex", justifyContent: "space-between", gap: "20px" }}>
-        {meta.wifi && (
-          <li>
-            <FontAwesomeIcon icon={faWifi} /> WiFi Available
-          </li>
-        )}
-        {meta.parking && (
-          <li>
-            <FontAwesomeIcon icon={faParking} /> Parking Available
-          </li>
-        )}
-        {meta.breakfast && (
-          <li>
-            <FontAwesomeIcon icon={faCoffee} /> Breakfast Included
-          </li>
-        )}
-        {meta.pets && (
-          <li>
-            <FontAwesomeIcon icon={faPaw} /> Pets Allowed
-          </li>
-        )}
-      </ul>
-
-      {/* Takvim */}
-      <div style={{ marginTop: "20px",fontSize:"12px" ,}}>
+      <p style={{ textAlign: "center", color: "#555" }}>{description}</p>
+      <p>
+        <strong>Price per night:</strong> ${price}
+      </p>
+      <p>
+        <strong>Max Guests:</strong> {maxGuests}
+      </p>
+      <p style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+        <FontAwesomeIcon icon={faStar} style={{ color: "gold" }} />
+        {rating}
+      </p>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          width: "100%",
+        }}
+      >
         <label>
           <strong>Select Start Date:</strong>
         </label>
@@ -143,10 +136,9 @@ function VenueDetails() {
           selectsStart
           startDate={startDate}
           endDate={endDate}
-          placeholderText="Select start date"
-          style={{ width: "100%", marginTop: "10px" }}
+          style={{ width: "100%", padding: "10px", borderRadius: "5px" }}
         />
-        <label style={{ marginTop: "10px",fontSize:"12px", }}>
+        <label>
           <strong>Select End Date:</strong>
         </label>
         <DatePicker
@@ -156,34 +148,42 @@ function VenueDetails() {
           startDate={startDate}
           endDate={endDate}
           minDate={startDate}
-          placeholderText="Select end date"
-          style={{ width: "100%", marginTop: "10px" ,}}
+          style={{ width: "100%", padding: "10px", borderRadius: "5px" }}
+        />
+        <label>
+          <strong>Number of Guests:</strong>
+        </label>
+        <input
+          type="number"
+          value={numberOfGuests}
+          min="1"
+          max={maxGuests}
+          onChange={(e) => setNumberOfGuests(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px",
+            borderRadius: "5px",
+            border: "1px solid #ddd",
+          }}
         />
       </div>
-
-      {/* Rezervasyon Butonu */}
       <button
+        onClick={handleConfirm}
         style={{
-          backgroundColor: "brown",
+          backgroundColor: "#EA6659",
           color: "white",
-          width: "100%",
-          height: "3rem",
-          cursor: "pointer",
+          padding: "10px 20px",
           border: "none",
-          marginTop: "20px",
-        }}
-        onClick={() => {
-          if (!startDate || !endDate) {
-            alert("Please select both start and end dates!");
-          } else {
-            alert(
-              `Booking confirmed from ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`
-            );
-          }
+          borderRadius: "5px",
+          cursor: "pointer",
+          fontWeight: "bold",
         }}
       >
-        Select dates to book
+        BOOK
       </button>
+      <p>
+        <strong>Total Price:</strong> {calculateTotalPrice()}
+      </p>
     </div>
   );
 }

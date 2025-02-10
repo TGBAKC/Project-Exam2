@@ -1,106 +1,57 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "@fortawesome/fontawesome-free/css/all.min.css";
 
-
-function Header() {
+const Header = () => {
   const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem("authToken"); // Giriş kontrolü
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken"); // Tokeni temizle
-    navigate("/login"); // Login sayfasına yönlendir
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("token"); // Token'ı temizle
+      navigate("/login"); // Giriş sayfasına yönlendir
+    }
   };
 
   return (
-    <nav
+    <header
       style={{
         display: "flex",
+      
         justifyContent: "space-between",
         alignItems: "center",
         padding: "10px 20px",
-        backgroundColor: "#333",
-        color: "white",
+        backgroundColor: "#EA6659",
+        color: "#fff",
       }}
     >
-      {/* Sol tarafa Holidaze bağlantısı */}
-      <Link
-        to="/VenueList"
-        style={{
-          marginRight: "15px",
-          color: "white",
-          textDecoration: "none",
-          fontSize: "18px",
-        }}
-      >
-        Holidaze
-      </Link>
-
-      {/* Sağ tarafa dinamik bağlantılar */}
-      <div>
-        {isLoggedIn ? (
-          // Kullanıcı giriş yaptıysa
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <Link
-              to="/customer-dashboard"
-              style={{
-                marginRight: "15px",
-                color: "white",
-                textDecoration: "none",
-                fontSize: "18px",
-              }}
-            >
-          <i
-    className="fa fa-user-circle"
-    style={{
-      marginRight: "8px", // Metin ile ikon arasında boşluk
-      fontSize: "30px",
-      color:"white", // İkon boyutu
-    }}
-  ></i>
-            </Link>
-            <button
-              onClick={handleLogout}
-              style={{
-                backgroundColor: "transparent",
-                border: "none",
-                color: "white",
-                fontSize: "18px",
-                cursor: "pointer",
-              }}
-            >
-              Logout
-            </button>
-          </div>
-        ) : (
-          // Kullanıcı giriş yapmamışsa
-          <div>
-            <Link
-              to="/login"
-              style={{
-                marginRight: "15px",
-                color: "white",
-                textDecoration: "none",
-                fontSize: "18px",
-              }}
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              style={{
-                color: "white",
-                textDecoration: "none",
-                fontSize: "18px",
-              }}
-            >
-              Register
-            </Link>
-          </div>
-        )}
-      </div>
-    </nav>
+        <Link to="/venueList" style={{ color: "#fff", textDecoration: "none" }}>
+     HOLIDAZE
+        </Link>
+      <nav style={{ display: "flex", gap: "15px" }}>
+        <Link to="/dashboard" style={{ color: "#fff", textDecoration: "none" }}>
+          Dashboard
+        </Link>
+        <Link to="/venueList" style={{ color: "#fff", textDecoration: "none" }}>
+          Venues
+        </Link>
+        <Link to="/login" style={{ color: "#fff", textDecoration: "none" }}>
+      Login
+        </Link>
+  
+        <button
+          onClick={handleLogout}
+          style={{
+            backgroundColor: "transparent",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          Logout
+        </button>
+      </nav>
+      
+    </header>
   );
-}
+};
 
 export default Header;
