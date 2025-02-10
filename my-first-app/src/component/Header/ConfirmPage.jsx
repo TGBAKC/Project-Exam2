@@ -57,8 +57,6 @@ const ConfirmPage = () => {
   
   
   const handleEdit = () => {
-    console.log("📌 handleEdit çağrıldı, ID:", id);
-  
     if (!id || id === "undefined") {
       console.error("❌ Error: Booking ID is missing!");
       alert("Something went wrong. Booking ID is missing!");
@@ -96,7 +94,7 @@ const ConfirmPage = () => {
       {/* 📌 Edit ve Delete Butonları */}
       <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
       <button
-  onClick={() => navigate(`/details/${id}`)}
+  onClick={handleEdit}
   style={{
     backgroundColor: "#ffc107",
     color: "#000",

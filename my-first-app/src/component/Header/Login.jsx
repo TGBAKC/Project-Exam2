@@ -58,7 +58,7 @@ function Login() {
         <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required style={{ marginBottom: "15px", padding: "10px", borderRadius: "5px", border: "1px solid #ccc", fontSize: "16px" }} />
         <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} required style={{ marginBottom: "15px", padding: "10px", borderRadius: "5px", border: "1px solid #ccc", fontSize: "16px" }} />
         <button type="submit" style={{ backgroundColor: "#EA6659", color: "#fff", padding: "10px", border: "none", borderRadius: "5px", fontSize: "16px", cursor: "pointer" }}>Login</button>
-        <Link to="/register" style={{ color: "#EA6659", textDecoration: "none" ,textAlign:"center",marginTop:"10px",textDecoration:"underline"}}>
+        <Link to="/register" style={{ color: "#EA6659", textDecoration: "none" ,textAlign:"center",marginTop:"10px"}}>
   Dont have an account.Register here
         </Link>
       </form>

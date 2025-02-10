@@ -9,9 +9,7 @@ import Register from "./component/Header/Register";
 import Footer from "./component/Header/Footer";
 import ConfirmPage from "./component/Header/ConfirmPage";
 import Dashboard from "./component/Header/Dashboard";
-import SearchBar from "./component/Header/SearchBar";
 import EditVenue from "./component/Header/EditVenue";
-import ProtectedRoute from "./component/Header/ProtectedRoute"; // ProtectedRoute eklendi
 import RegisterVenue from "./component/Header/RegisterVenue";
 import EditBooking from "./component/Header/EditBooking";
 function App() {

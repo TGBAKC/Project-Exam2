@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 const EditBooking = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const booking = location.state?.booking || null;
+  const [booking, setBooking] = useState(location.state?.booking || null);
 
   console.log("Location State:", location.state); // ✅ Gelen veriyi kontrol et
   console.log("Booking Data:", booking);

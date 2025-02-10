@@ -167,6 +167,22 @@ function Dashboard() {
 
         </>
       )}
+      {/* Eğer Venue Manager ise venues listesini göster */}
+{isVenueManager && venues.length > 0 ? (
+  <div>
+    <h3>Your Venues</h3>
+    <ul style={{ listStyle: "none", padding: 0 }}>
+      {venues.map((venue) => (
+        <li key={venue.id} style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
+          <strong>{venue.name}</strong>
+        </li>
+      ))}
+    </ul>
+  </div>
+) : (
+  isVenueManager && <p>You have no venues yet.</p>
+)}
+
     </div>
   );
 }

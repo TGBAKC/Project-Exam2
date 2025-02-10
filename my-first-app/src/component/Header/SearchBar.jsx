@@ -1,17 +1,16 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import debounce from "lodash/debounce";
 
 const SearchBar = ({ onSearch }) => {
   const [query, setQuery] = useState("");
 
-  // Debounced search handler
-  const debouncedSearch = useCallback(
+  // useRef ile debounce fonksiyonunu sadece bir kere oluştur
+  const debouncedSearch = useRef(
     debounce((searchQuery) => {
-      console.log("Debounced search triggered:", searchQuery); // Kontrol için
+      console.log("Debounced search triggered:", searchQuery);
       onSearch(searchQuery);
-    }, 500), // 500ms gecikme
-    [onSearch]
-  );
+    }, 500)
+  ).current;
 
   const handleInputChange = (value) => {
     setQuery(value);
@@ -59,3 +58,4 @@ const SearchBar = ({ onSearch }) => {
 };
 
 export default SearchBar;
+
