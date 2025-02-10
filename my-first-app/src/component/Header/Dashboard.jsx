@@ -1,34 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [venues, setVenues] = useState([]); // 📌 Venues listesi için state
-  const [isVenueManager, setIsVenueManager] = useState(false); // 📌 Venue Manager olup olmadığını kontrol etmek için state
+  const [venues, setVenues] = useState([]); // Venues listesi için state
+  const [isVenueManager, setIsVenueManager] = useState(false); // Venue Manager olup olmadığını kontrol etmek için state
 
-  useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    const storedApiKey = localStorage.getItem("apiKey");
-
-    if (!storedUser) {
-      navigate("/login");
-    } else {
-      setUser(storedUser);
-      setIsVenueManager(storedUser.venueManager);
-
-      if (!storedApiKey) {
-        createApiKey();
-      }
-
-      if (storedUser.venueManager) {
-        fetchVenues(); // ✅ Hata vermemesi için fonksiyon aşağıda tanımlandı
-      }
-    }
-  }, [navigate]);
-
-  // ✅ Eksik olan createApiKey fonksiyonunu ekledik
-  const createApiKey = async () => {
+  // ✅ API Key oluşturma fonksiyonu (useCallback ile optimize edildi)
+  const createApiKey = useCallback(async () => {
     const token = localStorage.getItem("authToken");
     if (!token) {
       console.error("❌ No auth token found! Redirecting to login...");
@@ -40,7 +20,7 @@ function Dashboard() {
       const response = await fetch("https://v2.api.noroff.dev/auth/create-api-key", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name: "My API Key" }),
@@ -55,10 +35,10 @@ function Dashboard() {
     } catch (error) {
       console.error("❌ Error creating API Key:", error);
     }
-  };
+  }, [navigate]); // `useCallback` ile bağımlılıklar tanımlandı
 
-  // ✅ Eksik olan fetchVenues fonksiyonunu ekledik
-  const fetchVenues = async () => {
+  // ✅ Venue'leri getiren fonksiyon (useCallback ile optimize edildi)
+  const fetchVenues = useCallback(async () => {
     const token = localStorage.getItem("authToken");
     if (!token) {
       console.error("No auth token found!");
@@ -79,9 +59,30 @@ function Dashboard() {
     } catch (error) {
       console.error("Error fetching venues:", error);
     }
-  };
+  }, []);
 
-  // ✅ Eksik olan handleBecomeVenueManager fonksiyonunu ekledik
+  // ✅ Kullanıcı girişini ve API Key'i kontrol eden `useEffect`
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const storedApiKey = localStorage.getItem("apiKey");
+
+    if (!storedUser) {
+      navigate("/login");
+    } else {
+      setUser(storedUser);
+      setIsVenueManager(storedUser.venueManager);
+
+      if (!storedApiKey) {
+        createApiKey();
+      }
+
+      if (storedUser.venueManager) {
+        fetchVenues();
+      }
+    }
+  }, [navigate, createApiKey, fetchVenues]); // ✅ Bağımlılıklar eklendi
+
+  // ✅ Kullanıcıyı Venue Manager yapma fonksiyonu
   const handleBecomeVenueManager = async () => {
     if (!user) return;
 
@@ -101,7 +102,7 @@ function Dashboard() {
       const response = await fetch(apiUrl, {
         method: "PUT",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "X-Noroff-API-Key": apiKey,
           "Content-Type": "application/json; charset=UTF-8",
         },
@@ -118,7 +119,7 @@ function Dashboard() {
       const updatedUser = { ...user, venueManager: true };
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setUser(updatedUser);
-      setIsVenueManager(true); // State güncellemesi
+      setIsVenueManager(true);
 
       alert("✅ You are now a Venue Manager!");
     } catch (error) {
@@ -145,44 +146,43 @@ function Dashboard() {
             cursor: "pointer",
           }}
         >
-          Go to Venue Manager
+          Become a Venue Manager
         </button>
       ) : (
         <>
           <h3>🎉 Welcome, Venue Manager!</h3>
           <button
-  onClick={() => navigate("/registervenue")}
-  style={{
-    backgroundColor: "#28a745",
-    color: "#fff",
-    padding: "10px 20px",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    marginTop: "10px",
-  }}
->
-  Register New Venue
-</button>
-
+            onClick={() => navigate("/registervenue")}
+            style={{
+              backgroundColor: "#28a745",
+              color: "#fff",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              marginTop: "10px",
+            }}
+          >
+            Register New Venue
+          </button>
         </>
       )}
-      {/* Eğer Venue Manager ise venues listesini göster */}
-{isVenueManager && venues.length > 0 ? (
-  <div>
-    <h3>Your Venues</h3>
-    <ul style={{ listStyle: "none", padding: 0 }}>
-      {venues.map((venue) => (
-        <li key={venue.id} style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
-          <strong>{venue.name}</strong>
-        </li>
-      ))}
-    </ul>
-  </div>
-) : (
-  isVenueManager && <p>You have no venues yet.</p>
-)}
 
+      {/* Eğer Venue Manager ise venues listesini göster */}
+      {isVenueManager && venues.length > 0 ? (
+        <div>
+          <h3>Your Venues</h3>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {venues.map((venue) => (
+              <li key={venue.id} style={{ padding: "10px", borderBottom: "1px solid #ddd" }}>
+                <strong>{venue.name}</strong>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        isVenueManager && <p>You have no venues yet.</p>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState,  useRef } from "react";
 import debounce from "lodash/debounce";
 
 const SearchBar = ({ onSearch }) => {
