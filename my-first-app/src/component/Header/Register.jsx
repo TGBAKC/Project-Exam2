@@ -69,7 +69,7 @@ const Register = () => {
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
-        backgroundColor: "#f8f9fa",
+      
       }}
     >
       <div

@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import VenueDetails from "./component/Header/VenueDetails";
 import VenueList from "./component/Header/VenueList";
 import CreateVenue from "./component/Header/CreateVenue";
@@ -12,43 +12,32 @@ import Dashboard from "./component/Header/Dashboard";
 import EditVenue from "./component/Header/EditVenue";
 import RegisterVenue from "./component/Header/RegisterVenue";
 import EditBooking from "./component/Header/EditBooking";
+
 function App() {
   return (
     <Router>
-      <div className="App">
-    
+      {/* Sayfanın yüksekliğini en az ekran boyutunda olacak şekilde ayarladık */}
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+
         <Header />
 
-        <Routes>
-      
-          <Route
-            path="/venueList"
-            element={
-              <>
-       
-                <VenueList />
-              </>
-            }
-          />
+        {/* İçeriğin footer'ı aşağı itmesi için flex: 1 ekledik */}
+        <main style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/venueList" />} />
+            <Route path="/venueList" element={<VenueList />} />
+            <Route path="/edit-venue/:id" element={<EditVenue />} />
+            <Route path="/create-venue" element={<CreateVenue />} />
+            <Route path="/details/:id" element={<VenueDetails />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/confirm" element={<ConfirmPage />} />
+            <Route path="/edit-booking" element={<EditBooking />} />
+            <Route path="/registervenue" element={<RegisterVenue />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Routes>
+        </main>
 
-          {/* Diğer rotalar */}
-          <Route path="/edit-venue/:id" element={<EditVenue />} />
-          <Route path="/create-venue" element={<CreateVenue />} />
-          <Route path="/details/:id" element={<VenueDetails />} /> {/* ✅ Yeni rota eklendi */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/confirm" element={<ConfirmPage />} />
-
-          <Route path="/edit-booking" element={<EditBooking />} /> 
-          <Route path="/registervenue" element={<RegisterVenue />} />
-          <Route path="/edit-venue/:id" element={<EditVenue />} />
-
-          {/* Korunan rota */}
-          <Route path="/dashboard" element={<Dashboard />} />
-
-        </Routes>
-
-        
         <Footer />
       </div>
     </Router>

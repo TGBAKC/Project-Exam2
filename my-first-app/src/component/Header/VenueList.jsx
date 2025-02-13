@@ -128,7 +128,7 @@ const VenueList = () => {
                 <p>Price: ${venue.price}</p>
                 <p>Max Guests: {venue.maxGuests}</p>
                 <p>Rating:{venue.rating}</p>
-                <p style={{color:"#EA6659",}}>CHECHK AVAILABITY</p>
+                <p style={{color:"#EA6659",}}>CHECHK AVAILABILITY</p>
               </div>
             </Link>
           ))
