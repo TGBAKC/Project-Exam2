@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [venues, setVenues] = useState([]);
+ 
   const [isVenueManager, setIsVenueManager] = useState(false);
 
   // Kullanıcı bilgisini localStorage'dan al ve durumu güncelle
