@@ -2,8 +2,53 @@ import React, { useState, useEffect } from "react";
 import SearchBar from "./SearchBar";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
-import { faStar, faStarHalfAlt } from "@fortawesome/free-solid-svg-icons";
+import { faMapMarkerAlt, faStar, faStarHalfAlt } from "@fortawesome/free-solid-svg-icons";
+import styled from "styled-components";
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+`;
+
+const Title = styled.h1`
+  text-align: center;
+`;
+
+const VenueGrid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
+`;
+
+const VenueCard = styled(Link)`
+  flex: 1 1 calc(25% - 20px);
+  max-width: calc(25% - 20px);
+  min-width: 300px;
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+`;
+
+const VenueImage = styled.img`
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+`;
+
+const AvailabilityText = styled.p`
+  color: #ea6659;
+  font-weight: bold;
+`;
 
 const Rating = ({ rating }) => {
   const stars = [];
@@ -18,125 +63,78 @@ const Rating = ({ rating }) => {
   }
   return <span>{stars}</span>;
 };
+
 const VenueList = () => {
-  const [venues, setVenues] = useState([]); // Mekanlar
-  const [loading, setLoading] = useState(false); // Yükleniyor durumu
-  const [error, setError] = useState(null); // Hata durumu
+  const [venues, setVenues] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchVenues = async (searchQuery = "") => {
+    console.log("Search Query:", searchQuery); // ✅ Arama parametresini kontrol et
     setLoading(true);
     setError(null);
+  
     try {
       let url = `https://v2.api.noroff.dev/holidaze/venues?_media=true&_meta=true`;
-      if (searchQuery) {
-        url += `&q=${encodeURIComponent(searchQuery)}`;
-      }
-
+  
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("API request failed");
       }
-
+  
       const data = await response.json();
-      console.log("API Response:", data); // Gelen veriyi kontrol et
-
-      // Arama sorgusuna uygun sonuçları filtrele
-      if (!searchQuery) {
-        setVenues(data.data); // Tüm mekanları göster
-      } else {
-        const filteredData = data.data.filter((venue) =>
-          venue.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setVenues(filteredData); // Filtrelenmiş sonuçları state'e aktar
-      }
+      console.log("API Raw Response:", data); // ✅ API yanıtını konsola yazdır
+  
+      const venuesList = data.data || data; // ✅ Eğer `data.data` yoksa direkt `data` kullan
+  
+      const filteredData = venuesList
+        .filter((venue) => venue.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        .map((venue) => ({
+          ...venue,
+          media: venue.media || [], // Eğer medya eksikse boş array ata
+        }));
+  
+      setVenues(filteredData);
     } catch (err) {
       setError("Failed to fetch venues. Please try again later.");
-      console.error("Error fetching venues:", err);
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
-    fetchVenues(); // İlk yüklendiğinde tüm mekanları getir
+    fetchVenues();
   }, []);
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", padding: "20px" }}>
-      <h1>Venues</h1>
+    <Container>
+      <Title>Venues</Title>
       <SearchBar onSearch={fetchVenues} />
       {loading && <p>Loading venues...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "20px",
-          justifyContent: "center",
-          marginTop: "20px",
-        }}
-      >
+      <VenueGrid>
         {venues.length > 0 ? (
           venues.map((venue) => (
-            <Link
-              to={`/details/${venue.id}`} // Detay sayfasına yönlendirme
-              key={venue.id}
-              style={{
-                textDecoration: "none", // Link dekorasyonunu kaldır
-                color: "inherit", // Yazı rengini koru
-              }}
-            >
-            <div
- style={{
-  flex: "1 1 calc(25% - 20px)", // Kartlar 4 sütun düzenine uyum sağlar (büyük ekranlarda)
-  maxWidth: "calc(25% - 20px)", // Maksimum genişlik 4 sütun düzeni
-  minWidth: "300px", // Kartlar için minimum genişlik
-  marginBottom: "15px",
-  padding: "10px",
-  border: "1px solid #ccc",
-  borderRadius: "8px",
-  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-  textAlign: "center",
-  cursor: "pointer",
-}}
->
-                {venue.media?.length > 0 && (
-                  <img
-                    src={venue.media[0].url}
-                    alt={venue.name}
-                    style={{
-                      width: "100%",
-                      height: "150px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                    }}
-                  />
-                )}
-                <p>
-                  <strong>{venue.name}</strong>
-                </p>
-                <p>
-                  <strong>Rating:</strong> <Rating rating={venue.rating || 0} />
-                </p>
-                <p>
-  <FontAwesomeIcon
-    icon={faMapMarkerAlt}
-    style={{ color: "#EA6659", marginRight: "5px" }}
-  />
-  {venue.location?.address || "Address not available"}
-</p>
-
-                <p>Price: ${venue.price}</p>
-                <p>Max Guests: {venue.maxGuests}</p>
-                <p>Rating:{venue.rating}</p>
-                <p style={{color:"#EA6659",}}>CHECHK AVAILABILITY</p>
-              </div>
-            </Link>
+            <VenueCard to={`/details/${venue.id}`} key={venue.id}>
+              {venue.media?.length > 0 && <VenueImage src={venue.media[0].url} alt={venue.name} />}
+              <p><strong>{venue.name}</strong></p>
+              <p><strong>Rating:</strong> <Rating rating={venue.rating || 0} /></p>
+              <p>
+                <FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: "#EA6659", marginRight: "5px" }} />
+                {venue.location?.address || "Address not available"}
+              </p>
+              <p>Price: ${venue.price}</p>
+              <p>Max Guests: {venue.maxGuests}</p>
+              <p>Rating: {venue.rating}</p>
+              <AvailabilityText>CHECK AVAILABILITY</AvailabilityText>
+            </VenueCard>
           ))
         ) : (
           !loading && <p>No venues found.</p>
         )}
-      </div>
-    </div>
+      </VenueGrid>
+    </Container>
   );
 };
 

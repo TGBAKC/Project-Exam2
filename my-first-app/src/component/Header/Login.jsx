@@ -1,5 +1,79 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  padding: 30px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+`;
+
+const Title = styled.h2`
+  margin-bottom: 5px;
+  color: #333;
+  font-size: 22px;
+`;
+
+const Subtitle = styled.p`
+  margin-bottom: 20px;
+  color: #777;
+  font-size: 14px;
+`;
+
+const Input = styled.input`
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  outline: none;
+  transition: border 0.3s ease-in-out;
+
+  &:focus {
+    border: 1px solid #EA6659;
+  }
+`;
+
+const Button = styled.button`
+  background-color: #EA6659;
+  color: #fff;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+
+  &:hover {
+    background-color: #d45548;
+  }
+`;
+
+const RegisterText = styled.p`
+  margin-top: 15px;
+  font-size: 14px;
+  color: #666;
+`;
+
+const RegisterLink = styled.span`
+  color: #EA6659;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: underline;
+`;
 
 function Login() {
   const navigate = useNavigate();
@@ -26,15 +100,9 @@ function Login() {
       }
 
       const data = await response.json();
-
-      // ✅ Kullanıcı bilgilerini localStorage'a kaydet
       localStorage.setItem("user", JSON.stringify(data.data));
       localStorage.setItem("authToken", data.data.accessToken);
-
-      // ✅ Header güncellemesi için event tetikle
       window.dispatchEvent(new Event("storage"));
-
-      // ✅ Başarılı giriş sonrası yönlendirme
       navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error.message);
@@ -43,111 +111,38 @@ function Login() {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
+    <Container>
+      <Form onSubmit={handleSubmit}>
+        <Title>Welcome Back!</Title>
+        <Subtitle>Please login to continue</Subtitle>
 
-      }}
-    >
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          width: "320px",
-          padding: "30px",
-          borderRadius: "12px",
-          backgroundColor: "#fff",
-          boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.1)",
-          textAlign: "center",
-        }}
-      >
-        <h2 style={{ marginBottom: "5px", color: "#333", fontSize: "22px" }}>Welcome Back!</h2>
-        <p style={{ marginBottom: "20px", color: "#777", fontSize: "14px" }}>Please login to continue</p>
-
-        <input
+        <Input
           type="email"
           name="email"
           placeholder="Email"
           value={formData.email}
           onChange={handleChange}
           required
-          style={{
-            marginBottom: "15px",
-            padding: "12px",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-            fontSize: "16px",
-            outline: "none",
-            transition: "border 0.3s ease-in-out",
-          }}
-          onFocus={(e) => (e.target.style.border = "1px solid #EA6659")}
-          onBlur={(e) => (e.target.style.border = "1px solid #ccc")}
         />
-        <input
+        <Input
           type="password"
           name="password"
           placeholder="Password"
           value={formData.password}
           onChange={handleChange}
           required
-          style={{
-            marginBottom: "15px",
-            padding: "12px",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-            fontSize: "16px",
-            outline: "none",
-            transition: "border 0.3s ease-in-out",
-          }}
-          onFocus={(e) => (e.target.style.border = "1px solid #EA6659")}
-          onBlur={(e) => (e.target.style.border = "1px solid #ccc")}
         />
 
-        <button
-          type="submit"
-          style={{
-            backgroundColor: "#EA6659",
-            color: "#fff",
-            padding: "12px",
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "16px",
-            cursor: "pointer",
-            transition: "background 0.3s ease-in-out",
-          }}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = "#d45548")}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = "#EA6659")}
-        >
-          Login
-        </button>
+        <Button type="submit">Login</Button>
 
-        <p
-          style={{
-            marginTop: "15px",
-            fontSize: "14px",
-            color: "#666",
-          }}
-        >
-          Don't have an account?{" "}
-          <span
-            onClick={() => navigate("/register")}
-            style={{
-              color: "#EA6659",
-              cursor: "pointer",
-              fontWeight: "bold",
-              textDecoration: "underline",
-            }}
-          >
+        <RegisterText>
+          Don't have an account? {" "}
+          <RegisterLink onClick={() => navigate("/register")}>
             Register here
-          </span>
-        </p>
-      </form>
-    </div>
+          </RegisterLink>
+        </RegisterText>
+      </Form>
+    </Container>
   );
 }
 

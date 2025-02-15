@@ -1,10 +1,18 @@
 import React from "react";
+import styled from "styled-components";
+
+const FooterContainer = styled.footer`
+  background-color: #EA6659;
+  color: #fff;
+  padding: 10px 20px;
+  text-align: center;
+`;
 
 const Footer = () => {
   return (
-    <footer style={{  backgroundColor: "#EA6659", color: "#fff", padding: "10px 20px", textAlign: "center",}}>
+    <FooterContainer>
       <p>© 2025 Tüm Hakları Saklıdır.</p>
-    </footer>
+    </FooterContainer>
   );
 };
 

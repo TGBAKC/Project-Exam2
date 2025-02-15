@@ -1,5 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+
+const Container = styled.div`
+  text-align: center;
+  padding: 20px;
+`;
+
+const Form = styled.form`
+  border: 1px solid grey;
+  border-radius: 10px;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+`;
+
+const Input = styled.input`
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+`;
+
+const Textarea = styled.textarea`
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 100px;
+`;
+
+const Button = styled.button`
+  padding: 10px;
+  background-color: #EA6659;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+`;
 
 function RegisterVenue() {
   const [venueData, setVenueData] = useState({
@@ -110,7 +150,7 @@ function RegisterVenue() {
 
       alert("✅ Venue created successfully!");
       setTimeout(() => {
-        navigate(`/details/${venueId}`); // Başarıyla oluşturulan venue sayfasına yönlendir
+        navigate(`/details/${venueId}`);
       }, 500);
     } catch (error) {
       console.error("❌ Error creating venue:", error);
@@ -120,40 +160,21 @@ function RegisterVenue() {
   };
 
   return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
+    <Container>
       <h1>Register Venue</h1>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          border: "1px solid grey",
-          borderRadius: "10px",
-          maxWidth: "800px",
-          margin: "0 auto",
-          textAlign: "left",
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-          padding: "20px",
-        }}
-      >
-        <input type="text" name="name" placeholder="Venue Name" value={venueData.name} onChange={handleChange} required />
-        <textarea name="description" placeholder="Description" value={venueData.description} onChange={handleChange} required />
-        <input type="number" name="maxGuests" placeholder="Max Guests" value={venueData.maxGuests} onChange={handleChange} required />
-        <input type="number" name="price" placeholder="Price per Night" value={venueData.price} onChange={handleChange} required />
-        <input type="text" name="media" placeholder="Add Media URLs (comma separated)" value={venueData.media.map(m => m.url).join(", ") || ""} onChange={handleChange} required />
-        <input type="text" name="location.address" placeholder="Address" value={venueData.location.address} onChange={handleChange} required />
-        <input type="text" name="location.city" placeholder="City" value={venueData.location.city} onChange={handleChange} required />
-        <input type="text" name="location.zip" placeholder="ZIP Code" value={venueData.location.zip} onChange={handleChange} required />
-        <input type="text" name="location.country" placeholder="Country" value={venueData.location.country} onChange={handleChange} required />
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ padding: "10px", backgroundColor: "#EA6659", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}
-        >
-          {loading ? "Processing..." : "REGISTER VENUE"}
-        </button>
-      </form>
-    </div>
+      <Form onSubmit={handleSubmit}>
+        <Input type="text" name="name" placeholder="Venue Name" value={venueData.name} onChange={handleChange} required />
+        <Textarea name="description" placeholder="Description" value={venueData.description} onChange={handleChange} required />
+        <Input type="number" name="maxGuests" placeholder="Max Guests" value={venueData.maxGuests} onChange={handleChange} required />
+        <Input type="number" name="price" placeholder="Price per Night" value={venueData.price} onChange={handleChange} required />
+        <Input type="text" name="media" placeholder="Add Media URLs (comma separated)" value={venueData.media.map(m => m.url).join(", ") || ""} onChange={handleChange} required />
+        <Input type="text" name="location.address" placeholder="Address" value={venueData.location.address} onChange={handleChange} required />
+        <Input type="text" name="location.city" placeholder="City" value={venueData.location.city} onChange={handleChange} required />
+        <Input type="text" name="location.zip" placeholder="ZIP Code" value={venueData.location.zip} onChange={handleChange} required />
+        <Input type="text" name="location.country" placeholder="Country" value={venueData.location.country} onChange={handleChange} required />
+        <Button type="submit" disabled={loading}>{loading ? "Processing..." : "REGISTER VENUE"}</Button>
+      </Form>
+    </Container>
   );
 }
 

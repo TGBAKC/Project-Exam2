@@ -1,34 +1,79 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+
+// 🎨 Styled Components ile Bileşenlerin Tanımlanması
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 30px;
+  max-width: 400px;
+  margin: 20px auto;
+  border: 2px solid grey;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #f9f9f9;
+`;
+
+const Title = styled.h1`
+  margin-bottom: 10px;
+  color: #333;
+`;
+
+const Subtitle = styled.h3`
+  margin-bottom: 20px;
+  color: #555;
+`;
+
+const InfoText = styled.p`
+  font-size: 16px;
+  color: #444;
+  margin: 5px 0;
+`;
+
+const ButtonContainer = styled.div`
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+`;
+
+// 🎨 Dinamik Buton Bileşeni (renk seçeneği ile)
+const Button = styled.button`
+  background-color: ${(props) => props.bgColor || "#ccc"};
+  color: ${(props) => (props.bgColor === "#dc3545" ? "#fff" : "#000")};
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.8;
+  }
+`;
 
 const ConfirmPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const bookingDetails = location.state || {}; // Eğer state undefined ise boş obje atar
+  const bookingDetails = location.state || {}; 
   const { id, venueName, startDate, endDate, guests } = bookingDetails;
   
-
-  if (!bookingDetails) {
+  if (!bookingDetails || Object.keys(bookingDetails).length === 0) {
     return (
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        <h1>No Booking Found!</h1>
-        <p>Please make a booking first.</p>
-      </div>
+      <Container>
+        <Title>No Booking Found!</Title>
+        <InfoText>Please make a booking first.</InfoText>
+      </Container>
     );
   }
 
-
   const handleDelete = async () => {
-    const token = localStorage.getItem("authToken"); 
-    console.log("🛂 Auth Token:", token);
+    const token = localStorage.getItem("authToken");
     if (!id || id === "undefined") {
       alert("❌ Error: Invalid Booking ID!");
       return;
     }
   
     try {
-      console.log("🔍 Trying to delete booking with ID:", id);
-      console.log("🛂 Sending Authorization Token:", token); 
-  
       const response = await fetch(`https://v2.api.noroff.dev/holidaze/bookings/${id}`, {
         method: "DELETE",
         headers: {
@@ -37,10 +82,7 @@ const ConfirmPage = () => {
         },
       });
   
-      console.log("📡 API Status Code:", response.status);
       const responseData = await response.json();
-      console.log("📌 API Response:", responseData);
-  
       if (!response.ok) {
         throw new Error(`❌ API Error: ${responseData.message || "Failed to delete booking"} (Status: ${response.status})`);
       }
@@ -48,80 +90,33 @@ const ConfirmPage = () => {
       alert("✅ Booking deleted successfully!");
       navigate("/dashboard");
     } catch (error) {
-      console.error("❌ Error deleting booking:", error);
       alert("Error deleting booking: " + error.message);
     }
   };
-  
-  
-  
-  
+
   const handleEdit = () => {
     if (!id || id === "undefined") {
-      console.error("❌ Error: Booking ID is missing!");
       alert("Something went wrong. Booking ID is missing!");
       return;
     }
-  
-    console.log("Navigating to Venue Details Page with Edit Mode");
     navigate(`/details/${id}`, { state: { editMode: true } });
   };
-  
-  
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        padding: "30px",
-        maxWidth: "400px",
-        margin: "20px auto",
-        border: "2px solid grey",
-        borderRadius: "10px",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-        backgroundColor: "#f9f9f9",
-      }}
-    >
-      <h1 style={{ marginBottom: "10px", color: "#333" }}>Booking Confirmed!</h1>
-      <h3 style={{ marginBottom: "20px", color: "#555" }}>Booking Details</h3>
-      <p><strong>Venue:</strong> {venueName}</p>
-      <p><strong>Start Date:</strong> {new Date(startDate).toLocaleDateString()}</p>
-      <p><strong>End Date:</strong> {new Date(endDate).toLocaleDateString()}</p>
-      <p><strong>Guests:</strong> {guests}</p>
+    <Container>
+      <Title>Booking Confirmed!</Title>
+      <Subtitle>Booking Details</Subtitle>
+      <InfoText><strong>Venue:</strong> {venueName}</InfoText>
+      <InfoText><strong>Start Date:</strong> {new Date(startDate).toLocaleDateString()}</InfoText>
+      <InfoText><strong>End Date:</strong> {new Date(endDate).toLocaleDateString()}</InfoText>
+      <InfoText><strong>Guests:</strong> {guests}</InfoText>
 
       {/* 📌 Edit ve Delete Butonları */}
-      <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
-      <button
-  onClick={handleEdit}
-  style={{
-    backgroundColor: "#ffc107",
-    color: "#000",
-    padding: "10px 15px",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  }}
->
-  Edit
-</button>
-
-        <button
-          onClick={handleDelete}
-          style={{
-            backgroundColor: "#dc3545",
-            color: "#fff",
-            padding: "10px 15px",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Delete
-        </button>
-      </div>
-    </div>
+      <ButtonContainer>
+        <Button bgColor="#ffc107" onClick={handleEdit}>Edit</Button>
+        <Button bgColor="#dc3545" onClick={handleDelete}>Delete</Button>
+      </ButtonContainer>
+    </Container>
   );
 };
 
